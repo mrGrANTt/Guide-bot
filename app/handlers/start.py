@@ -12,8 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MENU_IMAGE = PROJECT_ROOT / "assets" / "menu.png"
 
 
-@router.message(CommandStart())
-async def cmd_start(message: Message) -> None:
+async def send_main_menu(message: Message) -> None:
     if not MENU_IMAGE.is_file():
         await message.answer(
             "Не удалось найти изображение главного меню."
@@ -33,3 +32,8 @@ async def cmd_start(message: Message) -> None:
         ),
         reply_markup=get_main_menu_keyboard(),
     )
+
+
+@router.message(CommandStart())
+async def cmd_start(message: Message) -> None:
+    await send_main_menu(message)
