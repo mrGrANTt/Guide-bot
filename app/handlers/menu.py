@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery
 
 from app.keyboards.quiz import get_excursion_keyboard
 from app.handlers.start import send_main_menu
+from app.services.quiz_loader import select_random_questions
 
 router = Router()
 
@@ -40,16 +41,25 @@ async def show_home(callback: CallbackQuery) -> None:
 async def select_excursion(callback: CallbackQuery) -> None:
     await callback.answer()
 
-    excursions = {
-        "excursion:architecture": "🏛️ Архитектура",
-        "excursion:painting": "🎨 Живопись",
-        "excursion:cinema": "🎬 Кино",
-    }
+    category = callback.data.removeprefix("excursion:")
 
-    excursion_name = excursions.get(callback.data)
+    try:
+        questions = select_random_questions(category, count=3)
+    except FileNotFoundError:
+        if callback.message:
+            await callback.message.answer(
+                "Не удалось найти файл этой экскурсии."
+            )
+        return
+    except ValueError as error:
+        if callback.message:
+            await callback.message.answer(
+                f"Не удалось начать экскурсию: {error}"
+            )
+        return
 
-    if callback.message and excursion_name:
+    if callback.message:
         await callback.message.answer(
-            f"Ты выбрал экскурсию «{excursion_name}»!\n\n"
-            "🚧 Вопросы добавим на следующем этапе."
+            f"🧭 Экскурсия началась!\n"
+            f"Выбрано вопросов: {questions}."
         )
