@@ -4,7 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 
 from app.config import BOT_TOKEN
-from app.handlers import start_router, menu_router, quiz_router
+from app.handlers import (start_router, menu_router, quiz_router, cards_router)
 
 async def main() -> None:
     logging.basicConfig(
@@ -18,6 +18,7 @@ async def main() -> None:
     dp.include_router(start_router)
     dp.include_router(menu_router)
     dp.include_router(quiz_router)
+    dp.include_router(cards_router)
 
     try:
         logging.info("Бот запускается")

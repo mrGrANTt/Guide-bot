@@ -22,16 +22,6 @@ async def show_quizzes(callback: CallbackQuery) -> None:
         )
 
 
-@router.callback_query(F.data == "menu:statistics")
-async def show_statistics(callback: CallbackQuery) -> None:
-    await callback.answer()
-
-    if callback.message:
-        await callback.message.answer(
-            "📊 Статистика станет доступна после подключения базы данных."
-        )
-
-
 @router.callback_query(F.data == "menu:home")
 async def show_home(callback: CallbackQuery) -> None:
     await callback.answer()

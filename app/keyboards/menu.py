@@ -13,7 +13,7 @@ def get_main_menu_keyboard() -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(
                     text="🧠 Изучить карточки",
-                    callback_data="menu:statistics",
+                    callback_data="menu:learn",
                 )
             ],
         ]
