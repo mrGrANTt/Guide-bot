@@ -12,8 +12,8 @@ def get_excursion_keyboard() -> InlineKeyboardMarkup:
             ],
             [
                 InlineKeyboardButton(
-                    text="🏭 avtozavodsky",
-                    callback_data="excursion:painting",
+                    text="🏭 Автозаводской",
+                    callback_data="excursion:avtozavodsky",
                 )
             ],
             [

@@ -111,7 +111,7 @@ async def check_answer(
     if callback.message:
         answer_image_name = question.get("answer_image")
         answer_image_path = (
-            ASSETS_DIR / answer_image_name
+            ASSETS_DIR / 'questions' / answer_image_name
             if answer_image_name
             else None
         )
