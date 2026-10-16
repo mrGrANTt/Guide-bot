@@ -6,20 +6,26 @@ def get_excursion_keyboard() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🏛️ Архитектура",
-                    callback_data="excursion:architecture",
+                    text="🏛️ Нижегородский",
+                    callback_data="excursion:nizhegorodsky",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="🎨 Живопись",
+                    text="🏭 avtozavodsky",
                     callback_data="excursion:painting",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="🎬 Кино",
-                    callback_data="excursion:cinema",
+                    text="🏩 Канавинский",
+                    callback_data="excursion:kanavinsky",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="⚒️ Советский",
+                    callback_data="excursion:sovetsky",
                 )
             ],
             [
@@ -49,3 +55,49 @@ def get_excursion_back_keyboard() -> InlineKeyboardMarkup:
             ],
         ]
     )
+
+def get_answer_keyboard(
+    answers: list[str],
+) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=answer,
+                    callback_data=f"quiz:answer:{index}",
+                )
+            ]
+            for index, answer in enumerate(answers)
+        ]
+    )
+
+
+def get_correct_answer_keyboard(
+        answers: list[str],
+        correct: int,
+        selected: int,
+        is_last: bool = False,
+) -> InlineKeyboardMarkup:
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                text=('✅ ' if correct == index else ('🚫 ' if selected == index else '')) + answer,
+                callback_data="quiz:ignore",
+            )
+        ]
+        for index, answer in enumerate(answers)
+    ]
+
+    keyboard.append([
+        InlineKeyboardButton(
+            text=(
+                "🏁 Завершить викторину"
+                if is_last
+                else "➡️ Следующий вопрос"
+            ),
+            callback_data="quiz:next"
+        )
+    ])
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
