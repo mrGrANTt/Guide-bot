@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.database.models import Base, Question, Answer
-from app.database.requests import save_answer, get_answers_by_quiz
+from app.database.requests import save_answer, get_answers_by_quiz, has_user_answered
 
 
 @pytest_asyncio.fixture
@@ -181,3 +181,77 @@ async def test_get_answers_by_quiz_returns_empty_list(session):
     )
 
     assert answers == []
+
+
+@pytest.mark.asyncio
+async def test_has_user_answered_returns_true(session):
+    """Возвращает True, если пользователь уже ответил на вопрос."""
+    await save_answer(session, 12345, "general", "q001", "a")
+
+    result = await has_user_answered(
+        session,
+        user_id=12345,
+        quiz_id="general",
+        question_id="q001",
+    )
+
+    assert result is True
+
+
+@pytest.mark.asyncio
+async def test_has_user_answered_returns_false(session):
+    """Возвращает False, если пользователь ещё не отвечал."""
+    result = await has_user_answered(
+        session,
+        user_id=12345,
+        quiz_id="general",
+        question_id="q001",
+    )
+
+    assert result is False
+
+
+@pytest.mark.asyncio
+async def test_has_user_answered_different_question(session):
+    """Ответ на другой вопрос не должен учитываться."""
+    await save_answer(session, 12345, "general", "q001", "a")
+
+    result = await has_user_answered(
+        session,
+        user_id=12345,
+        quiz_id="general",
+        question_id="q002",
+    )
+
+    assert result is False
+
+
+@pytest.mark.asyncio
+async def test_has_user_answered_different_user(session):
+    """Ответ другого пользователя не должен учитываться."""
+    await save_answer(session, 12345, "general", "q001", "a")
+
+    result = await has_user_answered(
+        session,
+        user_id=67890,
+        quiz_id="general",
+        question_id="q001",
+    )
+
+    assert result is False
+
+
+@pytest.mark.asyncio
+async def test_has_user_answered_different_quiz(session):
+    """Ответ на вопрос другой викторины не должен учитываться."""
+    await save_answer(session, 12345, "general", "q001", "a")
+
+    result = await has_user_answered(
+        session,
+        user_id=12345,
+        quiz_id="history",
+        question_id="q001",
+    )
+
+    assert result is False
+

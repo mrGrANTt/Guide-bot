@@ -78,6 +78,39 @@ async def save_answer(
 
     return "saved"
 
+async def has_user_answered(
+    session: AsyncSession,
+    user_id: int,
+    quiz_id: str,
+    question_id: str,
+) -> bool:
+    """Проверяет, отправлял ли пользователь ответ на определённый вопрос викторины.
+    Args:
+        session (AsyncSession): Асинхронная сессия SQLAlchemy для выполнения
+            запроса к базе данных.
+        user_id (int): Telegram ID пользователя, для которого выполняется
+            проверка.
+        quiz_id (str): ID викторины, к которой относится вопрос.
+        question_id (str): Строковый ID вопроса из JSON-файла.
+
+    Returns:
+        bool: True, если в базе данных найден ответ этого пользователя
+        на указанный вопрос; False, если сохранённый ответ не найден.
+    """
+    result = await session.execute(
+        select(Answer.id)
+        .join(Question, Answer.question_id == Question.id)
+        .where(
+            Answer.user_id == user_id,
+            Question.quiz_id == quiz_id,
+            Question.question_id == question_id,
+        )
+        .limit(1)
+    )
+
+    return result.scalar_one_or_none() is not None
+
+
 async def get_answers_by_quiz(
     session: AsyncSession,
     quiz_id: str,
