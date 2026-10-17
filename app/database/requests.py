@@ -13,6 +13,24 @@ async def save_answer(
     question_id: str,
     answer: str,
 ) -> str:
+     """Сохраняет ответ пользователя на вопрос викторины.
+
+    Находит вопрос по ID викторины и ID вопроса, создавая его при
+    отсутствии. Проверяет, не отвечал ли пользователь на этот вопрос
+    ранее, затем сохраняет ответ в БД.
+
+    Args:
+        session: Асинхронная сессия SQLAlchemy.
+        user_id: Telegram ID пользователя.
+        quiz_id: ID викторины.
+        question_id: Строковый ID вопроса из JSON.
+        answer: выбранный вариант ответа.
+
+    Returns:
+        "saved" — ответ успешно сохранён.
+        "already_answered" — пользователь уже отвечал на этот вопрос.
+        "error" — произошла ошибка целостности данных БД.
+    """
     result = await session.execute(
         select(Question).where(
             Question.quiz_id == quiz_id,
