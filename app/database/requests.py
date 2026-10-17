@@ -52,7 +52,6 @@ async def save_answer(
             answer=answer,
         )
     )
-
     try:
         await session.commit()
     except IntegrityError:
@@ -60,3 +59,25 @@ async def save_answer(
         return "error"
 
     return "saved"
+
+async def get_answers_by_quiz(
+    session: AsyncSession,
+    quiz_id: str,
+) -> list[Answer]:
+    """
+    Получает список ответов для указанной викторины.
+
+    Args:
+        session: Асинхронная сессия SQLAlchemy.
+        quiz_id: Идентификатор викторины.
+
+    Returns:
+        Список объектов Answer.
+    """
+    result = await session.scalars(
+        select(Answer)
+        .join(Question, Answer.question_id == Question.id)
+        .where(Question.quiz_id == quiz_id)
+    )
+
+    return list(result.all())

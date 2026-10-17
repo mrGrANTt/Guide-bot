@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.database.models import Base, Question, Answer
-from app.database.requests import save_answer
+from app.database.requests import save_answer, get_answers_by_quiz
 
 
 @pytest_asyncio.fixture
@@ -101,3 +101,83 @@ async def test_different_users_can_answer(session):
     answers = result.scalars().all()
 
     assert len(answers) == 2
+
+
+
+
+@pytest.mark.asyncio
+async def test_get_answers_by_quiz_returns_saved_answers(session):
+    """Возвращаются все сохранённые ответы указанной викторины."""
+
+    await save_answer(session, 12345, "general", "q001", "b")
+    await save_answer(session, 67890, "general", "q001", "a")
+    await save_answer(session, 12345, "general", "q002", "c")
+
+    answers = await get_answers_by_quiz(
+        session=session,
+        quiz_id="general",
+    )
+
+    actual = set()
+
+    for answer in answers:
+        question = await session.get(
+            Question,
+            answer.question_id,
+        )
+
+        assert question is not None
+
+        actual.add(
+            (
+                answer.user_id,
+                question.question_id,
+                answer.answer,
+            )
+        )
+
+    expected = {
+        (12345, "q001", "b"),
+        (67890, "q001", "a"),
+        (12345, "q002", "c"),
+    }
+
+    assert actual == expected
+
+
+@pytest.mark.asyncio
+async def test_get_answers_by_quiz_filters_other_quizzes(session):
+    """Ответы других викторин не попадают в результат."""
+
+    await save_answer(session, 12345, "general", "q001", "b")
+    await save_answer(session, 12345, "science", "q001", "c")
+
+    answers = await get_answers_by_quiz(
+        session=session,
+        quiz_id="general",
+    )
+
+    assert len(answers) == 1
+    assert answers[0].user_id == 12345
+    assert answers[0].answer == "b"
+
+    question = await session.get(
+        Question,
+        answers[0].question_id,
+    )
+
+    assert question is not None
+    assert question.question_id == "q001"
+    assert question.quiz_id == "general"
+
+
+@pytest.mark.asyncio
+async def test_get_answers_by_quiz_returns_empty_list(session):
+    """Если ответов нет, возвращается пустой список."""
+
+    answers = await get_answers_by_quiz(
+        session=session,
+        quiz_id="unknown",
+    )
+
+    assert answers == []
