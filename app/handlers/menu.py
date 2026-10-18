@@ -1,5 +1,6 @@
+from pathlib import Path
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
 
 from app.keyboards.quiz import get_excursion_keyboard
@@ -10,14 +11,25 @@ from app.states.quiz_state import QuizState
 
 router = Router()
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+REG_IMAGE = PROJECT_ROOT / "assets" / "select.png"
 
 @router.callback_query(F.data == "menu:quizzes")
 async def show_quizzes(callback: CallbackQuery) -> None:
     await callback.answer()
 
-    if callback.message:
+    if not REG_IMAGE.is_file():
         await callback.message.answer(
-            "🧭 Выбери район:",
+            "Не удалось найти изображение выбора района."
+        )
+        return
+
+    photo = FSInputFile(REG_IMAGE)
+
+    if callback.message:
+        await callback.message.answer_photo(
+            photo=photo,
+            caption="📚 Выбери район Нижнего Новгорода:",
             reply_markup=get_excursion_keyboard(),
         )
 

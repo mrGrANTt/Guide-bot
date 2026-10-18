@@ -19,6 +19,7 @@ from app.states.quiz_state import QuizState
 router = Router()
 
 ASSETS_DIR = Path(__file__).resolve().parents[2] / "assets"
+REG_IMAGE = ASSETS_DIR / "select.png"
 
 
 async def send_question(
@@ -160,9 +161,18 @@ async def next_question(
     if question_index + 1 >= len(questions):
         await state.clear()
 
-        if callback.message:
+        if not REG_IMAGE.is_file():
             await callback.message.answer(
-                "🏁 Викторина завершена!\n\n"
+                "Не удалось найти изображение выбора района."
+            )
+            return
+
+        photo = FSInputFile(REG_IMAGE)
+
+        if callback.message:
+            await callback.message.answer_photo(
+                photo=photo,
+                caption="🏁 Викторина завершена!\n\n"
                 "Выбирай следующий район:",
                 reply_markup=get_excursion_keyboard(),
             )

@@ -6,7 +6,7 @@ def get_main_menu_keyboard() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🎯 Выбрать район",
+                    text="🎯 Пройти викторину",
                     callback_data="menu:quizzes",
                 )
             ],

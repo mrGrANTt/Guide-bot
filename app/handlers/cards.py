@@ -14,10 +14,10 @@ from app.states.cards_state import CardsState
 
 router = Router()
 
-CARDS_ASSETS_DIR = (
-    Path(__file__).resolve().parents[2] / "assets" / "cards"
-)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
+CARDS_ASSETS_DIR = PROJECT_ROOT / "assets" / "cards"
+REG_IMAGE = PROJECT_ROOT / "assets" / "select.png"
 
 async def send_card(
     message: Message,
@@ -61,9 +61,18 @@ async def send_card(
 async def show_learn(callback: CallbackQuery) -> None:
     await callback.answer()
 
-    if callback.message:
+    if not REG_IMAGE.is_file():
         await callback.message.answer(
-            "📚 Выбери район Нижнего Новгорода:",
+            "Не удалось найти изображение выбора района."
+        )
+        return
+
+    photo = FSInputFile(REG_IMAGE)
+
+    if callback.message:
+        await callback.message.answer_photo(
+            photo=photo,
+            caption="📚 Выбери район Нижнего Новгорода:",
             reply_markup=get_district_keyboard(),
         )
 
