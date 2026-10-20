@@ -24,8 +24,8 @@ def get_district_keyboard() -> InlineKeyboardMarkup:
             ],
             [
                 InlineKeyboardButton(
-                    text="⚒️ Советский",
-                    callback_data="cards:district:sovetsky",
+                    text="⚒️ Сормовский",
+                    callback_data="cards:district:sormovsky",
                 )
             ],
             [
