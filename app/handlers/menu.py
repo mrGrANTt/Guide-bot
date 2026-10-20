@@ -70,3 +70,4 @@ async def select_excursion(
 
     if callback.message:
         await send_question(callback.message, state)
+        await callback.message.delete()

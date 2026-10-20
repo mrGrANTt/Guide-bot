@@ -27,7 +27,7 @@ def get_excursion_keyboard() -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(
                     text="⚒️ Сормовский",
-                    callback_data="cards:district:sormovsky",
+                    callback_data="excursion:sormovsky",
                 )
             ],
             [
