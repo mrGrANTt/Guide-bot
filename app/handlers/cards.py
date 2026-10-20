@@ -2,7 +2,7 @@ from pathlib import Path
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, FSInputFile
+from aiogram.types import CallbackQuery, Message, FSInputFile, InputMediaPhoto
 
 from app.keyboards.cards import (
     get_district_keyboard,
@@ -16,7 +16,7 @@ router = Router()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-CARDS_ASSETS_DIR = PROJECT_ROOT / "assets" / "cards"
+CARDS_ASSETS_DIR = PROJECT_ROOT / "assets" / "questions"
 REG_IMAGE = PROJECT_ROOT / "assets" / "select.png"
 
 async def send_card(
@@ -42,16 +42,18 @@ async def send_card(
         image_path = CARDS_ASSETS_DIR / image_name
 
         if image_path.is_file():
-            await message.answer_photo(
-                photo=FSInputFile(image_path),
-                caption=text,
+            await message.edit_media(
+                media=InputMediaPhoto(
+                    media=FSInputFile(image_path),
+                    caption=text,
+                    parse_mode="HTML",
+                ),
                 reply_markup=keyboard,
-                parse_mode="HTML",
             )
             return
 
-    await message.answer(
-        text,
+    await message.edit_caption(
+        caption=text,
         reply_markup=keyboard,
         parse_mode="HTML",
     )
@@ -75,7 +77,7 @@ async def show_learn(callback: CallbackQuery) -> None:
             caption="📚 Выбери район Нижнего Новгорода:",
             reply_markup=get_district_keyboard(),
         )
-
+        await callback.message.delete()
 
 @router.callback_query(F.data.startswith("cards:district:"))
 async def select_district(
@@ -113,7 +115,6 @@ async def select_district(
 
     if callback.message:
         await send_card(callback.message, state)
-        await callback.message.delete()
 
 
 @router.callback_query(
@@ -151,4 +152,3 @@ async def navigate_cards(
 
     if callback.message:
         await send_card(callback.message, state)
-        await callback.message.delete()

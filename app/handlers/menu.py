@@ -32,13 +32,14 @@ async def show_quizzes(callback: CallbackQuery) -> None:
             caption="📚 Выбери район Нижнего Новгорода:",
             reply_markup=get_excursion_keyboard(),
         )
-
+        await callback.message.delete()
 
 @router.callback_query(F.data == "menu:home")
 async def show_home(callback: CallbackQuery) -> None:
     await callback.answer()
 
     if callback.message:
+        await callback.message.delete()
         await send_main_menu(callback.message)
 
 
@@ -70,4 +71,3 @@ async def select_excursion(
 
     if callback.message:
         await send_question(callback.message, state)
-        await callback.message.delete()

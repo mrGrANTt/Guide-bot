@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     CallbackQuery,
     Message,
-    FSInputFile,
+    FSInputFile, InputMediaPhoto,
 )
 
 from app.keyboards.quiz import (
@@ -43,14 +43,15 @@ async def send_question(
     image_path = ASSETS_DIR / f"question_{question_number}.png"
 
     if image_path.is_file():
-        await message.answer_photo(
-            photo=FSInputFile(image_path),
-            caption=text,
+        await message.edit_media(
+            media=InputMediaPhoto(media=FSInputFile(image_path),
+                                  caption=text
+                    ),
             reply_markup=keyboard,
         )
     else:
-        await message.answer(
-            text,
+        await message.edit_text(
+            text=text,
             reply_markup=keyboard,
         )
 
@@ -118,13 +119,12 @@ async def check_answer(
         )
 
         if answer_image_path and answer_image_path.is_file():
-            await callback.message.answer_photo(
-                photo=FSInputFile(answer_image_path),
-                caption=text,
+            await callback.message.edit_media(
+                media=InputMediaPhoto(media=FSInputFile(answer_image_path),
+                                      caption=text
+                        ),
                 reply_markup=keyboard,
             )
-
-            await callback.message.delete()
 
         elif callback.message.caption is not None:
             await callback.message.edit_caption(
@@ -170,13 +170,13 @@ async def next_question(
         photo = FSInputFile(REG_IMAGE)
 
         if callback.message:
+            await callback.message.delete()
             await callback.message.answer_photo(
                 photo=photo,
                 caption="🏁 Викторина завершена!\n\n"
                 "Выбирай следующий район:",
                 reply_markup=get_excursion_keyboard(),
             )
-            await callback.message.delete()
 
         return
 
@@ -189,4 +189,3 @@ async def next_question(
 
     if callback.message:
         await send_question(callback.message, state)
-        await callback.message.delete()
