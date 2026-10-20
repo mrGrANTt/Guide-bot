@@ -6,6 +6,8 @@ from aiogram import Bot, Dispatcher
 from app.config import BOT_TOKEN
 from app.handlers import (start_router, menu_router, quiz_router, cards_router)
 
+from app.database.db import init_db, close_db
+
 async def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -21,10 +23,14 @@ async def main() -> None:
     dp.include_router(cards_router)
 
     try:
+        logging.info("База данных запускается")
+        await init_db()
         logging.info("Бот запускается")
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
+        await close_db()
+        logging.info("Программа остановлена...")
 
 
 if __name__ == "__main__":

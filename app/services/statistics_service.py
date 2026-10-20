@@ -1,11 +1,10 @@
 # Расчёт статистики ответов и результатов.
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.models import Base, Question, Answer
+from app.database.models import Question, Answer
+from app.database.db import SessionFactory
 
 
 async def get_question_statistics(
-    session: AsyncSession,
     quiz_id: str,
     question_id: str,
 ) -> dict[str, int]:
@@ -13,13 +12,13 @@ async def get_question_statistics(
     Получает статистику ответов на конкретный вопрос.
 
     Args:
-        session: Асинхронная сессия SQLAlchemy.
         quiz_id: Идентификатор викторины.
         question_id: Идентификатор вопроса.
 
     Returns:
         Словарь с количеством пользователей для каждого варианта ответа.
     """
+    session = SessionFactory()
     result = await session.execute(
         select(
             Answer.answer,

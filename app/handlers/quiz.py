@@ -88,11 +88,11 @@ async def check_answer(
 
     await state.update_data(selected_answer=answer_index)
 
-    keyboard = get_correct_answer_keyboard(
-        answers=answers,
-        correct=correct,
+    keyboard = await get_correct_answer_keyboard(
+        question=question,
         selected=answer_index,
         is_last=question_index == len(questions) - 1,
+        user_id=callback.from_user.id
     )
 
     result_text = (

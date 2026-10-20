@@ -1,4 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app.database.requests import *
+from app.services.statistics_service import get_question_statistics
 
 
 def get_excursion_keyboard() -> InlineKeyboardMarkup:
@@ -72,20 +74,35 @@ def get_answer_keyboard(
     )
 
 
-def get_correct_answer_keyboard(
-        answers: list[str],
-        correct: int,
+async def get_correct_answer_keyboard(
+        user_id: int,
         selected: int,
         is_last: bool = False,
+        question = {},
 ) -> InlineKeyboardMarkup:
+    correct = question["correct_answer"]
+    quiz_id = question["id"][:-6]
+    question_id = question["id"][-5:]
+    answer = str(selected)
+    await save_answer(
+        user_id=user_id,
+        answer=answer,
+        quiz_id=quiz_id,
+        question_id=question_id
+    )
+
+    other_answers = await get_question_statistics(quiz_id, question_id)
+    all_answers = sum(other_answers.values())
     keyboard = [
         [
             InlineKeyboardButton(
-                text=('✅ ' if correct == index else ('🚫 ' if selected == index else '')) + answer,
+                text=((f'✅ ' if correct == index else ('🚫 ' if selected == index else ''))
+                     + f'{int(100*other_answers[answer]/all_answers)}% '
+                     + answer),
                 callback_data="quiz:ignore",
             )
         ]
-        for index, answer in enumerate(answers)
+        for index, answer in enumerate(question["answers"])
     ]
 
     keyboard.append([

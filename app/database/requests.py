@@ -1,13 +1,12 @@
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import Question, Answer
+from app.database.db import SessionFactory
 
 
 async def save_answer(
-    session: AsyncSession,
     user_id: int,
     quiz_id: str,
     question_id: str,
@@ -20,7 +19,6 @@ async def save_answer(
     ранее, затем сохраняет ответ в БД.
 
     Args:
-        session: Асинхронная сессия SQLAlchemy.
         user_id: Telegram ID пользователя.
         quiz_id: ID викторины.
         question_id: Строковый ID вопроса из JSON.
@@ -31,6 +29,7 @@ async def save_answer(
         "already_answered" — пользователь уже отвечал на этот вопрос.
         "error" — произошла ошибка целостности данных БД.
     """
+    session = SessionFactory()
     result = await session.execute(
         select(Question).where(
             Question.quiz_id == quiz_id,
@@ -79,15 +78,12 @@ async def save_answer(
     return "saved"
 
 async def has_user_answered(
-    session: AsyncSession,
     user_id: int,
     quiz_id: str,
     question_id: str,
 ) -> bool:
     """Проверяет, отправлял ли пользователь ответ на определённый вопрос викторины.
     Args:
-        session (AsyncSession): Асинхронная сессия SQLAlchemy для выполнения
-            запроса к базе данных.
         user_id (int): Telegram ID пользователя, для которого выполняется
             проверка.
         quiz_id (str): ID викторины, к которой относится вопрос.
@@ -97,6 +93,7 @@ async def has_user_answered(
         bool: True, если в базе данных найден ответ этого пользователя
         на указанный вопрос; False, если сохранённый ответ не найден.
     """
+    session = SessionFactory()
     result = await session.execute(
         select(Answer.id)
         .join(Question, Answer.question_id == Question.id)
@@ -112,19 +109,18 @@ async def has_user_answered(
 
 
 async def get_answers_by_quiz(
-    session: AsyncSession,
     quiz_id: str,
 ) -> list[Answer]:
     """
     Получает список ответов для указанной викторины.
 
     Args:
-        session: Асинхронная сессия SQLAlchemy.
         quiz_id: Идентификатор викторины.
 
     Returns:
         Список объектов Answer.
     """
+    session = SessionFactory()
     result = await session.scalars(
         select(Answer)
         .join(Question, Answer.question_id == Question.id)
