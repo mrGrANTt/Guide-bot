@@ -84,26 +84,32 @@ async def get_correct_answer_keyboard(
     quiz_id = question["id"][:-6]
     question_id = question["id"][-5:]
     answer = str(selected)
-    await save_answer(
+    result = await save_answer(
         user_id=user_id,
         answer=answer,
         quiz_id=quiz_id,
         question_id=question_id
     )
+    if result == "error":
+        raise RuntimeError("Не удалось сохранить ответ")
+
 
     other_answers = await get_question_statistics(quiz_id, question_id)
     all_answers = sum(other_answers.values())
     keyboard = [
-        [
-            InlineKeyboardButton(
-                text=((f'✅ ' if correct == index else ('🚫 ' if selected == index else ''))
-                     + f'{int(100*other_answers[answer]/all_answers)}% '
-                     + answer),
-                callback_data="quiz:ignore",
-            )
-        ]
-        for index, answer in enumerate(question["answers"])
+    [
+        InlineKeyboardButton(
+            text=(
+                f'{"✅ " if correct == index else ("🚫 " if selected == index else "")}'
+                f'{int(100 * other_answers.get(str(index), 0) / all_answers) if all_answers else 0}% '
+                f'{answer_text}'
+            ),
+            callback_data="quiz:ignore",
+        )
     ]
+    for index, answer_text in enumerate(question["answers"])
+]
+    
 
     keyboard.append([
         InlineKeyboardButton(
